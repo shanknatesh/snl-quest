@@ -6,7 +6,8 @@
       "Self_discharge_efficiency": 100,
       "Round_trip_efficiency": 90,
       "Energy_capacity": 24,
-      "Power_rating": 36
+      "Power_rating": 36,
+      "StorEdgeAI_Advisory": 10
      }
     },
     {
@@ -16,7 +17,8 @@
       "Self_discharge_efficiency": 100,
       "Round_trip_efficiency": 95,
       "Energy_capacity": 7.5,
-      "Power_rating": 10
+      "Power_rating": 10,
+      "StorEdgeAI_Advisory": 10
      }
     },
     {
@@ -26,7 +28,8 @@
       "Self_discharge_efficiency": 100,
       "Round_trip_efficiency": 85,
       "Energy_capacity": 5,
-      "Power_rating": 20
+      "Power_rating": 20,
+      "StorEdgeAI_Advisory": 10
      }
     },
     {
@@ -36,7 +39,8 @@
       "Self_discharge_efficiency": 100,
       "Round_trip_efficiency": 85,
       "Energy_capacity": 60,
-      "Power_rating": 15
+      "Power_rating": 15,
+      "StorEdgeAI_Advisory": 10
      }
     },
     {
@@ -46,7 +50,8 @@
       "Self_discharge_efficiency": 100,
       "Round_trip_efficiency": 93,
       "Energy_capacity": 7.8,
-      "Power_rating": 19.8
+      "Power_rating": 19.8,
+      "StorEdgeAI_Advisory": 10
      }
     }
 ]

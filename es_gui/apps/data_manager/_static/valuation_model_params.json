@@ -61,6 +61,12 @@
       "name": "performance score",
       "attr name": "perf_score",
       "default": 0.95
+     },
+     {
+      "name": "StorEdgeAI Advisory",
+      "attr name": "StorEdgeAI_Advisory",
+      "default": 10,
+      "max": 100
      }
     ],
     "ERCOT": [

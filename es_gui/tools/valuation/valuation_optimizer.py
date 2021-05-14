@@ -14,19 +14,15 @@ from es_gui.tools.valuation.constraints import ExpressionsBlock
 class ValuationOptimizer(optimizer.Optimizer):
     """A framework wrapper class for creating Pyomo ConcreteModels for energy storage valuation."""
 
-    def __init__(self, price_electricity=None,
-                 price_reg_up=None, price_reg_down=None,
-                 price_reg_serv_up=None, price_reg_serv_down=None,
-                 price_regulation=None, price_reg_service=None,
-                 cost_charge=None, cost_discharge=None,
-                 mileage_mult=None, mileage_mult_ru=None, mileage_mult_rd=None,
-                 perf_score=None, perf_score_ru=None, perf_score_rd=None,
-                 fraction_reg_up=None, fraction_reg_down=None,
-                 market_type='arbitrage',
-                 solver='glpk'):
+    def __init__(self, price_electricity=None, price_reg_up=None, price_reg_down=None, price_reg_serv_up=None,
+                 price_reg_serv_down=None, price_regulation=None, price_reg_service=None, cost_charge=None,
+                 cost_discharge=None, mileage_mult=None, mileage_mult_ru=None, mileage_mult_rd=None, perf_score=None,
+                 perf_score_ru=None, perf_score_rd=None, fraction_reg_up=None, fraction_reg_down=None,
+                 market_type='arbitrage', solver='glpk'):
 
         # TODO: deprecate Perf_score and mileage_ratio
 
+        super().__init__(solver)
         self._model = ConcreteModel()
         self._market_type = market_type
         self._solver = solver
@@ -284,12 +280,18 @@ class ValuationOptimizer(optimizer.Optimizer):
             logging.debug('ValuationOptimizer: No Energy_capacity provided, setting default...')
             m.Energy_capacity = 5
 
+        if not hasattr(m, 'StorEdgeAI_Advisory'):
+            # StorEdgeAI Advisory factor
+            logging.debug('ValuationOptimizer: No StorEdgeAI_Advisory provided, setting default...')
+            m.StorEdgeAI_Advisory = 10
+
         if not hasattr(m, 'Self_discharge_efficiency'):
             # Fraction of energy maintained over one time period.
             logging.debug('ValuationOptimizer: No Self_discharge_efficiency provided, setting default...')
             m.Self_discharge_efficiency = 1.00
         elif getattr(m, 'Self_discharge_efficiency') > 1.0:
-            logging.warning('ValuationOptimizer: Self_discharge_efficiency provided is greater than 1.0, interpreting as percentage...')
+            logging.warning('ValuationOptimizer: Self_discharge_efficiency provided is greater than 1.0, interpreting '
+                            'as percentage...')
             m.Self_discharge_efficiency = m.Self_discharge_efficiency/100
 
         if not hasattr(m, 'Round_trip_efficiency'):
@@ -297,7 +299,8 @@ class ValuationOptimizer(optimizer.Optimizer):
             logging.debug('ValuationOptimizer: No Round_trip_efficiency provided, setting default...')
             m.Round_trip_efficiency = 0.85
         elif getattr(m, 'Round_trip_efficiency') > 1.0:
-            logging.warning('ValuationOptimizer: Round_trip_efficiency provided is greater than 1.0, interpreting as percentage...')
+            logging.warning('ValuationOptimizer: Round_trip_efficiency provided is greater than 1.0, interpreting as '
+                            'percentage...') 
             m.Round_trip_efficiency = m.Round_trip_efficiency/100
 
         if not hasattr(m, 'Reserve_reg_min'):
@@ -305,7 +308,8 @@ class ValuationOptimizer(optimizer.Optimizer):
             logging.debug('ValuationOptimizer: No Reserve_reg_min provided, setting default...')
             m.Reserve_reg_min = 0
         elif getattr(m, 'Reserve_reg_min') > 1.0:
-            logging.warning('ValuationOptimizer: Reserve_reg_min provided is greater than 1.0, interpreting as percentage...')
+            logging.warning('ValuationOptimizer: Reserve_reg_min provided is greater than 1.0, interpreting as '
+                            'percentage...') 
             m.Reserve_reg_min = m.Reserve_reg_min/100
 
         if not hasattr(m, 'Reserve_reg_max'):
@@ -313,7 +317,8 @@ class ValuationOptimizer(optimizer.Optimizer):
             logging.debug('ValuationOptimizer: No Reserve_reg_max provided, setting default...')
             m.Reserve_reg_max = 0
         elif getattr(m, 'Reserve_reg_max') > 1.0:
-            logging.warning('ValuationOptimizer: Reserve_reg_max provided is greater than 1.0, interpreting as percentage...')
+            logging.warning('ValuationOptimizer: Reserve_reg_max provided is greater than 1.0, interpreting as '
+                            'percentage...') 
             m.Reserve_reg_max = m.Reserve_reg_max/100
 
         if not hasattr(m, 'State_of_charge_min'):
@@ -321,7 +326,8 @@ class ValuationOptimizer(optimizer.Optimizer):
             logging.debug('ValuationOptimizer: No State_of_charge_min provided, setting default...')
             m.State_of_charge_min = 0
         elif getattr(m, 'State_of_charge_min') > 1.0:
-            logging.warning('ValuationOptimizer: State_of_charge_min provided is greater than 1.0, interpreting as percentage...')
+            logging.warning('ValuationOptimizer: State_of_charge_min provided is greater than 1.0, interpreting as '
+                            'percentage...') 
             m.State_of_charge_min = m.State_of_charge_min/100
 
         if not hasattr(m, 'State_of_charge_max'):
@@ -329,7 +335,8 @@ class ValuationOptimizer(optimizer.Optimizer):
             logging.debug('ValuationOptimizer: No State_of_charge_max provided, setting default...')
             m.State_of_charge_max = 1
         elif getattr(m, 'State_of_charge_max') > 1.0:
-            logging.warning('ValuationOptimizer: State_of_charge_max provided is greater than 1.0, interpreting as percentage...')
+            logging.warning('ValuationOptimizer: State_of_charge_max provided is greater than 1.0, interpreting as '
+                            'percentage...') 
             m.State_of_charge_max = m.State_of_charge_max/100
         
         if not hasattr(m, 'State_of_charge_init'):
@@ -348,7 +355,8 @@ class ValuationOptimizer(optimizer.Optimizer):
                     m.fraction_reg_up = 0.25
             except ValueError:  # fraction_reg_up is array-like
                 if np.isnan(m.fraction_reg_up).any():
-                    logging.debug('ValuationOptimizer: fraction_reg_up array-like provided has None values, setting default...')
+                    logging.debug('ValuationOptimizer: fraction_reg_up array-like provided has None values, setting '
+                                  'default...') 
                     m.fraction_reg_up = 0.25
 
             try:
@@ -357,7 +365,8 @@ class ValuationOptimizer(optimizer.Optimizer):
                     m.fraction_reg_down = 0.25
             except ValueError:  # fraction_reg_down is array-like
                 if np.isnan(m.fraction_reg_down).any():
-                    logging.debug('ValuationOptimizer: fraction_reg_down array-like provided has None values, setting default...')
+                    logging.debug('ValuationOptimizer: fraction_reg_down array-like provided has None values, '
+                                  'setting default...') 
                     m.fraction_reg_down = 0.25
 
             # Converts fraction_reg_up and fraction_reg_down to arrays.
@@ -445,7 +454,7 @@ class ValuationOptimizer(optimizer.Optimizer):
         if not hasattr(m, 's'):
             def _s_init(_m, t):
                 """The energy storage device's state of charge [MWh]."""
-                return m.State_of_charge_init*m.Energy_capacity
+                return m.State_of_charge_init * m.Energy_capacity
 
             m.s = Var(m.soc_time, initialize=_s_init, within=NonNegativeReals)
 
@@ -479,7 +488,8 @@ class ValuationOptimizer(optimizer.Optimizer):
 
         if not hasattr(m, 'q_reg'):
             def _q_reg_init(_m, t):
-                """The quantity of energy offered into the regulation market [MWh]. For single product frequency regulation markets."""
+                """The quantity of energy offered into the regulation market [MWh]. For single product frequency
+                regulation markets. """
                 return 0.0
 
             m.q_reg = Var(m.time, initialize=_q_reg_init, within=NonNegativeReals)
@@ -544,14 +554,14 @@ class ValuationOptimizer(optimizer.Optimizer):
             self.expressions_block.set_expressions(self.model)
         except IndexError:
             # Array-like object(s) do(es) not match the length of the price_electricity array-like.
-            raise(IncompatibleDataException('At least one of the array-like parameter objects is not the expected length. (It should match the length of the price_electricity object.)'))
+            raise(IncompatibleDataException('At least one of the array-like parameter objects is not the expected '
+                                            'length. (It should match the length of the price_electricity object.)'))
         else:
             self.model.objective = Objective(expr=self.model.objective_expr, sense=maximize)
         
-        # if self.model.objective.value == 0.0:
-        #     # Detect constant objective function value.
-        #     raise(IncompatibleDataException('The objective function was ill-formed, resulting in a constant objective function.'))
-
+        # if self.model.objective.value == 0.0: # Detect constant objective function value. raise(
+        # IncompatibleDataException('The objective function was ill-formed, resulting in a constant objective
+        # function.'))
 
     def _process_results(self):
         """Processes optimization results for further evaluation."""
@@ -565,19 +575,28 @@ class ValuationOptimizer(optimizer.Optimizer):
         q_reg = [m.q_reg[n].value for n in m.time]
         soc = [m.s[n].value for n in m.time]
         price_electricity = [m.price_electricity[n] for n in m.time]
+        storedgeai_advisory = np.array([m.StorEdgeAI_Advisory] * len(m.price_electricity))
 
         run_results = {'time': t, 'q_r': q_r, 'q_d': q_d, 'q_ru': q_ru, 'q_rd': q_rd, 'q_reg': q_reg,
-                       'state of charge': soc, 'price of electricity': price_electricity}
+                       'state of charge': soc, 'price of electricity': price_electricity,
+                       'storedgeai_advisory': storedgeai_advisory}
+
+        print('market type is:', self.market_type)
 
         if self.market_type == 'pjm_pfp':
-            rev_arb = np.cumsum(np.array([m.price_electricity[t]*(m.q_d[t].value - m.q_r[t].value) for t in m.time]))
-            rev_reg = np.cumsum(np.array([m.q_reg[t].value*m.perf_score[t]*(m.mi_mult[t]*m.price_reg_service[t] + m.price_regulation[t]) for t in m.time]))
+            rev_arb = np.cumsum(
+                np.array([m.price_electricity[t] * m.StorEdgeAI_Advisory *
+                          (m.q_d[t].value - m.q_r[t].value) for t in m.time]))
+            rev_reg = np.cumsum(
+                np.array([m.q_reg[t].value * m.perf_score[t] * m.StorEdgeAI_Advisory *
+                          (m.mi_mult[t] * m.price_reg_service[t] + m.price_regulation[t]) for t in m.time]))
 
             revenue = rev_arb + rev_reg
 
             run_results['rev_arb'] = rev_arb
             run_results['rev_reg'] = rev_reg
             run_results['revenue'] = revenue
+
         elif self.market_type == 'miso_pfp':
             rev_arb = np.cumsum(np.array([m.price_electricity[t]*(m.q_d[t].value - m.q_r[t].value) for t in m.time]))
             rev_reg = np.cumsum(np.array([(1 + m.Make_whole)*m.perf_score[t]*m.price_regulation[t]*m.q_reg[t].value for t in m.time]))
@@ -587,7 +606,7 @@ class ValuationOptimizer(optimizer.Optimizer):
             run_results['rev_arb'] = rev_arb
             run_results['rev_reg'] = rev_reg
             run_results['revenue'] = revenue
-        #//////////////////////////////////////////////////#
+
         elif self.market_type == 'isone_pfp':
             rev_arb = np.cumsum(np.array([m.price_electricity[t]*(m.q_d[t].value - m.q_r[t].value) for t in m.time]))
             rev_reg = np.cumsum(np.array([(m.mi_mult[t] * m.price_reg_service[t] + m.price_regulation[t]) * m.perf_score[t]*m.q_reg[t].value for t in m.time]))
@@ -597,8 +616,7 @@ class ValuationOptimizer(optimizer.Optimizer):
             run_results['rev_arb'] = rev_arb
             run_results['rev_reg'] = rev_reg
             run_results['revenue'] = revenue
-        #//////////////////////////////////////////////////#
-        #######################################################################################################################
+
         elif self.market_type == 'nyiso_pfp':
             rev_arb = np.cumsum(np.array([m.price_electricity[t]*(m.q_d[t].value - m.q_r[t].value) for t in m.time]))
             rev_reg = np.cumsum(np.array([m.q_reg[t].value* m.price_regulation[t] * (1 - 1.1*(1 - m.perf_score[t]))
@@ -611,15 +629,9 @@ class ValuationOptimizer(optimizer.Optimizer):
             run_results['rev_arb'] = rev_arb
             run_results['rev_reg'] = rev_reg
             run_results['revenue'] = revenue
-        #######################################################################################################################
-        #######################################################################################################################
+
         elif self.market_type == 'spp_pfp':
             # TODO: copied from 'ercot_arbreg' -make sure is correct for this market
-            # rev_arb = np.cumsum(np.array([m.price_electricity[t]*(m.q_d[t].value - m.q_r[t].value
-            #                                                       + m.q_ru[t].value*m.fraction_reg_up[t]
-            #                                                       - m.q_rd[t].value*m.fraction_reg_down[t])
-            #                               for t in m.time]))
-            # rev_reg = np.cumsum(np.array([m.ru[t]*m.q_ru[t].value + m.rd[t]*m.q_rd[t].value for t in m.time]))
             rev_arb = np.cumsum(np.array([m.price_electricity[t]*(m.q_d[t].value - m.q_r[t].value) for t in m.time]))
             rev_reg = np.cumsum(np.array([m.price_reg_up[t] * m.q_ru[t].value + m.price_reg_down[t] * m.q_rd[t].value
                                           + m.price_electricity[t]*(m.q_ru[t].value * m.fraction_reg_up[t]
@@ -631,16 +643,8 @@ class ValuationOptimizer(optimizer.Optimizer):
             run_results['rev_arb'] = rev_arb
             run_results['rev_reg'] = rev_reg
             run_results['revenue'] = revenue
-        #######################################################################################################################
+
         elif self.market_type == 'caiso_pfp':
-            # rev_arb = np.cumsum(np.array([m.price_electricity[t]*(m.q_d[t].value - m.q_r[t].value
-            #                                                       + m.q_ru[t].value*m.fraction_reg_up[t]
-            #                                                       - m.q_rd[t].value*m.fraction_reg_down[t])
-            #                               for t in m.time]))
-            # rev_reg = np.cumsum(np.array([m.price_reg_up[t] * m.q_ru[t].value + m.price_reg_down[t] * m.q_rd[t].value
-            #                               + m.perf_score_ru[t] * m.mi_mult_ru[t] * m.price_reg_serv_up[t]
-            #                               + m.perf_score_rd[t] * m.mi_mult_rd[t] * m.price_reg_serv_down[t]
-            #                               for t in m.time]))
             rev_arb = np.cumsum(np.array([m.price_electricity[t]*(m.q_d[t].value - m.q_r[t].value) for t in m.time]))
             rev_reg = np.cumsum(np.array([m.price_reg_up[t] * m.q_ru[t].value + m.price_reg_down[t] * m.q_rd[t].value
                                           + m.perf_score_ru[t] * m.mi_mult_ru[t] * m.price_reg_serv_up[t]
@@ -654,14 +658,8 @@ class ValuationOptimizer(optimizer.Optimizer):
             run_results['rev_arb'] = rev_arb
             run_results['rev_reg'] = rev_reg
             run_results['revenue'] = revenue
-        #######################################################################################################################
+
         elif self.market_type == 'ercot_arbreg':
-            # rev_arb = np.cumsum(np.array([m.price_electricity[t]*(m.q_d[t].value - m.q_r[t].value
-            #                                                       + m.q_ru[t].value*m.fraction_reg_up[t]
-            #                                                       - m.q_rd[t].value*m.fraction_reg_down[t])
-            #                               for t in m.time]))
-            # # rev_reg = np.cumsum(np.array([m.ru[t] * m.q_ru[t].value + m.rd[t] * m.q_rd[t].value for t in m.time]))
-            # rev_reg = np.cumsum(np.array([m.price_reg_up[t] * m.q_ru[t].value + m.price_reg_down[t] * m.q_rd[t].value for t in m.time]))
             rev_arb = np.cumsum(np.array([m.price_electricity[t]*(m.q_d[t].value - m.q_r[t].value) for t in m.time]))
             rev_reg = np.cumsum(np.array([m.price_reg_up[t] * m.q_ru[t].value + m.price_reg_down[t] * m.q_rd[t].value
                                           + m.price_electricity[t]*(m.q_ru[t].value * m.fraction_reg_up[t]
@@ -675,8 +673,8 @@ class ValuationOptimizer(optimizer.Optimizer):
             run_results['revenue'] = revenue
         else:
             rev_arb = np.cumsum(np.array([m.price_electricity[t] * (m.q_d[t].value - m.q_r[t].value)
-                                          for t in m.time]))
-            rev_reg = np.cumsum(np.array([0 for t in m.time]))
+                                          for t in m.time])) * m.StorEdgeAI_Advisory
+            rev_reg = np.cumsum(np.array([0 for t in m.time])) * m.StorEdgeAI_Advisory
 
             revenue = rev_arb + rev_reg
 
@@ -689,7 +687,7 @@ class ValuationOptimizer(optimizer.Optimizer):
         except IndexError:
             # Revenue is of length-0, likely due to no price_electricity array-like being given before solving.
             self.gross_revenue = 0
-        
+
         self.results = pd.DataFrame(run_results)
 
     def get_results(self):

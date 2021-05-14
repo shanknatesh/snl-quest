@@ -26,5 +26,12 @@
      "max": 100,
      "default": 10,
      "step": 1
+    },
+    {
+     "name": "StorEdgeAI Advisory",
+     "attr name": "StorEdgeAI_Advisory",
+     "default": 10,
+     "max": 100,
+     "step": 1
     }
 ]
