@@ -347,6 +347,9 @@ The format is basically two columns; the "Date/Time" column gives the month, day
 
 Once new files are added to the `data` bank appropriately, they should be picked up in the relevant applications when you are prompted to make a selection.
 
+#### Hacks
+- To add/edit data to the dataframes/arrays downloaded via API using DataManager, run the Valuation and delete the `valuation_dms.p` pickle file so that the edited data persists in the `.csv` files imported from DataManager.
+
 ## References
 <a id="references"></a>
 Nguyen, Tu A., David A. Copp, and Raymond H. Byrne. "Stacking Revenue of Energy Storage System from Resilience, T&D Deferral and Arbitrage." 2019 IEEE Power & Energy Society General Meeting (PESGM). IEEE, 2019.
