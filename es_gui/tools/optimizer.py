@@ -27,7 +27,8 @@ class Optimizer(with_metaclass(ABCMeta)):
 
     @property
     def results(self):
-        """A results DataFrame containing series of indices, decision variables, and/or model parameters or derived quantities."""
+        """A results DataFrame containing series of indices, decision variables, and/or model parameters or derived
+        quantities. """
         return self._results
 
     @abstractmethod
@@ -47,7 +48,8 @@ class Optimizer(with_metaclass(ABCMeta)):
 
     @abstractmethod
     def populate_model(self):
-        """A method for setting model parameters, variables, and an ExpressionsBlock object for defining objectives and constraints."""
+        """A method for setting model parameters, variables, and an ExpressionsBlock object for defining objectives
+        and constraints. """
         pass
 
     def solve_model(self):
@@ -75,7 +77,8 @@ class Optimizer(with_metaclass(ABCMeta)):
         pass
 
     def run(self):
-        """Instantiates, creates, and solves the optimizer model based on supplied information. Use if no steps are needed between constructing the model and solving it."""
+        """Instantiates, creates, and solves the optimizer model based on supplied information. Use if no steps are
+        needed between constructing the model and solving it. """
         self.instantiate_model()
         self.populate_model()
 
@@ -96,8 +99,10 @@ class Optimizer(with_metaclass(ABCMeta)):
         try:
             assert (results.solver.termination_condition.key == 'optimal')
         except AssertionError:
-            logging.error('Optimizer: An optimal solution could not be obtained. (solver termination condition: {0})'.format(results.solver.termination_condition.key))
-            raise(AssertionError('An optimal solution could not be obtained. (solver termination condition: {0})'.format(results.solver.termination_condition.key)))
+            logging.error('Optimizer: An optimal solution could not be obtained. '
+                          '(solver termination condition: {0})'.format(results.solver.termination_condition.key))
+            raise(AssertionError('An optimal solution could not be obtained. (solver termination '
+                                 'condition: {0})'.format(results.solver.termination_condition.key)))
         else:
             self._process_results()
 

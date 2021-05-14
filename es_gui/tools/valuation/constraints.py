@@ -182,8 +182,9 @@ def eq_objective_arb(m):
     mp = m.parent_block()
 
     _expr = sum(
-        (mp.price_electricity[t] * mp.q_d[t] - mp.price_electricity[t] * mp.q_r[t]) * math.e ** (-t * mp.R) for
-        t in mp.time)
+        (mp.price_electricity[t] * mp.q_d[t] -
+         mp.price_electricity[t] * mp.q_r[t]) *
+        math.e ** (-t * mp.R) for t in mp.time)
 
     mp.objective_expr += _expr
     m.objective_rt = Expression(expr=_expr)
@@ -228,6 +229,55 @@ def ineq_discharge_limit(m):
         return mp.Q_d_max >= mp.q_d[t]
 
     m.discharge_limit = Constraint(mp.time, rule=_ineq_discharge_limit)
+
+#############################
+# PJM Pay-for-Performance ###
+#############################
+
+
+def eq_objective_pjm_pfp(m):
+    """Net revenue over the time horizon for pay-for-performance in PJM market."""
+    mp = m.parent_block()
+
+    _expr = sum((mp.price_electricity[t] * mp.q_d[t] - mp.price_electricity[t] * mp.q_r[t] * mp.sa[t]
+                 + mp.q_reg[t] * mp.perf_score[t] * (mp.mi_mult[t] * mp.price_reg_service[t] + mp.price_regulation[t]))
+                * math.e ** (-t * mp.R) for t in mp.time)
+
+    mp.objective_expr += _expr
+    m.objective_rt = Expression(expr=_expr)
+
+
+def eq_stateofcharge_pjm_pfp(m):
+    """Definition of state of charge for device in PJM pay-for-performance market."""
+    mp = m.parent_block()
+
+    def _eq_stateofcharge_pjm_pfp(_m, t):
+        return mp.Self_discharge_efficiency * mp.s[t] + mp.Round_trip_efficiency * mp.q_r[t] \
+                - mp.q_d[t] + mp.Round_trip_efficiency * mp.fraction_reg_down[t] * mp.q_reg[t] \
+                - mp.fraction_reg_up[t] * mp.q_reg[t] == mp.s[t+1]
+
+    m.stateofcharge = Constraint(mp.time, rule=_eq_stateofcharge_pjm_pfp)
+
+
+def ineq_charge_limit_pjm_pfp(m):
+    """Limits the energy charged at each timestep to the device maximum."""
+    mp = m.parent_block()
+
+
+    def _ineq_charge_limit_pjm_pfp(_m, t):
+        return mp.Q_r_max >= mp.q_r[t] + mp.q_reg[t]
+
+    m.charge_limit = Constraint(mp.time, rule=_ineq_charge_limit_pjm_pfp)
+
+
+def ineq_discharge_limit_pjm_pfp(m):
+    """Limits the energy discharged at each timestep to the device maximum."""
+    mp = m.parent_block()
+
+    def _ineq_discharge_limit_pjm_pfp(_m, t):
+        return mp.Q_d_max >= mp.q_d[t] + mp.q_reg[t]
+
+    m.discharge_limit = Constraint(mp.time, rule=_ineq_discharge_limit_pjm_pfp)
 
 
 ###################################
@@ -280,55 +330,6 @@ def ineq_discharge_limit_ercot_arbreg(m):
         return mp.Q_d_max >= mp.q_d[t] + mp.q_ru[t]
 
     m.discharge_limit = Constraint(mp.time, rule=_ineq_discharge_limit_ercot_arbreg)
-
-
-#############################
-# PJM Pay-for-Performance ###
-#############################
-
-
-def eq_objective_pjm_pfp(m):
-    """Net revenue over the time horizon for pay-for-performance in PJM market."""
-    mp = m.parent_block()
-
-    _expr = sum((mp.price_electricity[t] * mp.q_d[t] - mp.price_electricity[t] * mp.q_r[t]
-                 + mp.q_reg[t] * mp.perf_score[t] * (mp.mi_mult[t] * mp.price_reg_service[t] + mp.price_regulation[t]))
-                * math.e ** (-t * mp.R) for t in mp.time)
-
-    mp.objective_expr += _expr
-    m.objective_rt = Expression(expr=_expr)
-
-
-def eq_stateofcharge_pjm_pfp(m):
-    """Definition of state of charge for device in PJM pay-for-performance market."""
-    mp = m.parent_block()
-
-    def _eq_stateofcharge_pjm_pfp(_m, t):
-        return mp.Self_discharge_efficiency * mp.s[t] + mp.Round_trip_efficiency * mp.q_r[t] \
-                - mp.q_d[t] + mp.Round_trip_efficiency * mp.fraction_reg_down[t] * mp.q_reg[t] \
-                - mp.fraction_reg_up[t] * mp.q_reg[t] == mp.s[t+1]
-
-    m.stateofcharge = Constraint(mp.time, rule=_eq_stateofcharge_pjm_pfp)
-
-
-def ineq_charge_limit_pjm_pfp(m):
-    """Limits the energy charged at each timestep to the device maximum."""
-    mp = m.parent_block()
-
-    def _ineq_charge_limit_pjm_pfp(_m, t):
-        return mp.Q_r_max >= mp.q_r[t] + mp.q_reg[t]
-
-    m.charge_limit = Constraint(mp.time, rule=_ineq_charge_limit_pjm_pfp)
-
-
-def ineq_discharge_limit_pjm_pfp(m):
-    """Limits the energy discharged at each timestep to the device maximum."""
-    mp = m.parent_block()
-
-    def _ineq_discharge_limit_pjm_pfp(_m, t):
-        return mp.Q_d_max >= mp.q_d[t] + mp.q_reg[t]
-
-    m.discharge_limit = Constraint(mp.time, rule=_ineq_discharge_limit_pjm_pfp)
 
 
 #############################

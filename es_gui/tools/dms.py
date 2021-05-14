@@ -8,9 +8,13 @@ import os
 import numpy as np
 
 
-class DataManagementSystem():
+class DataManagementSystem:
     """
-    A class used to store processed DataFrames as NumPy ndarrays and manage memory consumed. Data is stored in nested dictionaries up to a depth of 2: {key_0: {key_0_0: data}}. When the calculated memory exceeds max_memory, the dictionary at depth 1 at the front of the queue is popped out of the dictionary until the memory consumption is less than the maximum. The queue is determined by time of accessing. Accessing or adding to the structure at any depth will push the depth 1 dictionary to the back of the queue.
+    A class used to store processed DataFrames as NumPy ndarrays and manage memory consumed. Data is stored in nested
+    dictionaries up to a depth of 2: {key_0: {key_0_0: data}}. When the calculated memory exceeds max_memory,
+    the dictionary at depth 1 at the front of the queue is popped out of the dictionary until the memory consumption
+    is less than the maximum. The queue is determined by time of accessing. Accessing or adding to the structure at
+    any depth will push the depth 1 dictionary to the back of the queue.
 
     :param save_name: The path/filename to pickle the DMS's data.
     :param max_memory: The maximum amount of memory, in bytes, that the contained ndarrays may collectively occupy.

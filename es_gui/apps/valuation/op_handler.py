@@ -124,7 +124,8 @@ class ValuationOptimizerHandler:
 
                     if 'No executable found' in e.args[0]:
                         # Could not locate solver executable
-                        handler_status.add('* The executable for the selected solver could not be found; please check your installation.')
+                        handler_status.add('* The executable for the selected solver could not be found; please check '
+                                           'your installation.')
                     else:
                         handler_status.add('* ({0} {1}) {2}. The problem may be infeasible.'.format(month, year, e.args[0]))
                 except IncompatibleDataException as e:
@@ -134,10 +135,11 @@ class ValuationOptimizerHandler:
                 except AssertionError as e:
                     # An optimal solution could not be found as reported by the solver
                     logging.error('Op Handler: {error}'.format(error=e))
-                    handler_status.add('* ({0} {1}) An optimal solution could not be found; the problem may be infeasible.'.format(month, year))
+                    handler_status.add('* ({0} {1}) An optimal solution could not be found; the problem may be '
+                                       'infeasible.'.format(month, year))
                 else:
                     solved_op = self._save_to_solved_ops(solved_op, iso, market_type, node_name,
-                                                        year, month, params)
+                                                         year, month, params)
                     solved_requests.append(solved_op)
 
         logging.info('Op Handler: Finished processing requested jobs.')

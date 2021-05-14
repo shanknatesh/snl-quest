@@ -21,11 +21,11 @@ from es_gui.resources.widgets.common import TWO_ABC_WIDTH, THREE_ABC_WIDTH, MyPo
 
 class ValuationReport(WizardReportInterface):
     chart_types = OrderedDict({'Revenue (by month)': 'revenue_bar',
-                   'Revenue (by stream)': 'revenue_multisetbar',
-                   'Participation (total)': 'activity_donut',
-                   #'Activity (by source)': 'activity_stackedbar',
-                   'Participation (by month)': 'activity_stackedbar_normalized'
-                   })
+                               'Revenue (by stream)': 'revenue_multisetbar',
+                               'Participation (total)': 'activity_donut',
+                               # 'Activity (by source)': 'activity_stackedbar',
+                               'Participation (by month)': 'activity_stackedbar_normalized'
+                               })
 
     def __init__(self, chart_data, report_attributes, market=None, **kwargs):
         super(ValuationReport, self).__init__(**kwargs)
@@ -43,7 +43,10 @@ class ValuationReport(WizardReportInterface):
             button.bind(state=partial(self.add_report, opt[1]))
             self.chart_type_toggle.add_widget(button)
 
-            screen = ValuationReportScreen(type=opt[1], chart_data=self.chart_data, market=self.market, name=opt[1])
+            screen = ValuationReportScreen(chart_type=opt[1],
+                                           chart_data=self.chart_data,
+                                           market=self.market,
+                                           name=opt[1])
             sm.add_widget(screen)
 
     def add_report(self, chart_type, *args):
@@ -52,7 +55,10 @@ class ValuationReport(WizardReportInterface):
         sm.transition = WipeTransition(duration=0.8, clearcolor=[1, 1, 1, 1])
 
         if not sm.has_screen(chart_type):
-            screen = ValuationReportScreen(type=chart_type, chart_data=self.chart_data, market=self.market, name=chart_type)
+            screen = ValuationReportScreen(chart_type=chart_type,
+                                           chart_data=self.chart_data,
+                                           market=self.market,
+                                           name=chart_type)
             sm.add_widget(screen)
 
         sm.current = chart_type
@@ -74,12 +80,15 @@ class ValuationReportScreen(ReportScreen):
     activities = dict()
     activities['arbitrage'] = [('q_r', 'buy (arbitrage)'), ('q_d', 'sell (arbitrage)'),]
     activities['pjm_pfp'] = [('q_r', 'buy (arbitrage)'), ('q_d', 'sell (arbitrage)'), ('q_reg', 'regulation'), ]
-    activities['ercot_arbreg'] = [('q_r', 'buy (arbitrage)'), ('q_d', 'sell (arbitrage)'), ('q_ru', 'regulation up'), ('q_rd', 'regulation down'), ]
+    activities['ercot_arbreg'] = [('q_r', 'buy (arbitrage)'), ('q_d', 'sell (arbitrage)'), ('q_ru', 'regulation up'),
+                                  ('q_rd', 'regulation down'), ]
     activities['miso_pfp'] = [('q_r', 'buy (arbitrage)'), ('q_d', 'sell (arbitrage)'), ('q_reg', 'regulation'), ]
     activities['isone_pfp'] = [('q_r', 'buy (arbitrage)'), ('q_d', 'sell (arbitrage)'), ('q_reg', 'regulation'), ]
     activities['nyiso_pfp'] = [('q_r', 'buy (arbitrage)'), ('q_d', 'sell (arbitrage)'), ('q_reg', 'regulation'), ]
-    activities['spp_pfp'] = [('q_r', 'buy (arbitrage)'), ('q_d', 'sell (arbitrage)'), ('q_ru', 'regulation up'), ('q_rd', 'regulation down'), ]
-    activities['caiso_pfp'] = [('q_r', 'buy (arbitrage)'), ('q_d', 'sell (arbitrage)'), ('q_ru', 'regulation up'), ('q_rd', 'regulation down'), ]
+    activities['spp_pfp'] = [('q_r', 'buy (arbitrage)'), ('q_d', 'sell (arbitrage)'), ('q_ru', 'regulation up'),
+                             ('q_rd', 'regulation down'), ]
+    activities['caiso_pfp'] = [('q_r', 'buy (arbitrage)'), ('q_d', 'sell (arbitrage)'), ('q_ru', 'regulation up'),
+                               ('q_rd', 'regulation down'), ]
 
     # lookup table for actions that constitute regulation services for each model formulation
     regulation_def = dict()
@@ -92,10 +101,10 @@ class ValuationReportScreen(ReportScreen):
     regulation_def['spp_pfp'] = ['regulation up', 'regulation down', ]
     regulation_def['caiso_pfp'] = ['regulation up', 'regulation down', ]
 
-    def __init__(self, type, chart_data, market=None, do_animation=True, **kwargs):
+    def __init__(self, chart_type, chart_data, market=None, do_animation=True, **kwargs):
         super(ValuationReportScreen, self).__init__(**kwargs)
 
-        self.chart_type = type
+        self.chart_type = chart_type
         self.chart_data = chart_data
         self.do_animation = do_animation
 
@@ -148,7 +157,11 @@ class ValuationReportScreen(ReportScreen):
             self.desc_bx.size_hint_y = 0.33
 
             # generate stackedbar chart
-            self.chart = StackedBarChart(bar_spacing=25, legend_width=TWO_ABC_WIDTH/4, y_axis_format='{0:n}%', size_hint_x=1.0, do_animation=self.do_animation)
+            self.chart = StackedBarChart(bar_spacing=25,
+                                         legend_width=TWO_ABC_WIDTH/4,
+                                         y_axis_format='{0:n}%',
+                                         size_hint_x=1.0,
+                                         do_animation=self.do_animation)
             self.bind(on_enter=partial(self.generate_activity_stackedbar_chart, market, True))
         else:
             raise(ValueError('An improper chart type was specified. (got {0})'.format(self.chart_type)))
@@ -178,12 +191,13 @@ class ValuationReportScreen(ReportScreen):
         for ix, op in enumerate(self.chart_data, start=0):
             name = op[0]
             _, _, year, month, _ = name.split(' | ')
-            #label = ' '.join([year, month])
-            #label = calendar.month_abbr[int(month)]
+            # label = ' '.join([year, month])
+            # label = calendar.month_abbr[int(month)]
             label = month
 
             solved_op = op[1]
             results = solved_op.results
+            print(f'gross revenue for {label} is:', solved_op.gross_revenue)
 
             bar_color = colors[divmod(ix, len(colors))[1]]
 
@@ -197,14 +211,19 @@ class ValuationReportScreen(ReportScreen):
 
         # generate report text
         self.title.text = "Here's how much revenue the device generated each month."
-        self.desc.text = 'Revenue was generated based on participation in the selected revenue streams. '
         report_templates = [
-            'The gross revenue generated over the evaluation period was [b]${0:,.2f}[/b].'.format(sum([op[1].gross_revenue for op in self.chart_data])),
-            'The highest revenue in a month was [b]${0:,.2f}[/b], generated in [b]{1}[/b].'.format(max_bar.value,
-                                                                                                   calendar.month_name[list(calendar.month_abbr).index(max_bar.name)]),
-        'The lowest revenue in a month was [b]${0:,.2f}[/b], generated in [b]{1}[/b].'.format(min_bar.value,
-                                                                                              calendar.month_name[list(calendar.month_abbr).index(min_bar.name)]),
+            'The gross revenue generated over the evaluation period was '
+            '[b]${0:,.2f}[/b].'.format(sum([op[1].gross_revenue for op in self.chart_data])),
+            'The highest revenue in a month was '
+            '[b]${0:,.2f}[/b], '
+            'generated in [b]{1}[/b].'.format(max_bar.value,
+                                              calendar.month_name[list(calendar.month_abbr).index(max_bar.name)]),
+            'The lowest revenue in a month was '
+            '[b]${0:,.2f}[/b], '
+            'generated in [b]{1}[/b].'.format(min_bar.value,
+                                              calendar.month_name[list(calendar.month_abbr).index(min_bar.name)]),
         ]
+        self.desc.text = 'Revenue was generated based on participation in the selected revenue streams. '
 
         self.desc.text += ' '.join(report_templates)
 
@@ -249,7 +268,8 @@ class ValuationReportScreen(ReportScreen):
         self.title.text = "Here's how the device generated revenue each month."
         self.desc.text = 'Revenue was generated based on participation in the selected revenue streams. '
         report_templates = [
-            'The [b]gross revenue[/b] generated over the evaluation period was [b]${0:,.2f}[/b].'.format(sum([op[1].gross_revenue for op in self.chart_data])),
+            'The [b]gross revenue[/b] generated over the evaluation period was '
+            '[b]${0:,.2f}[/b].'.format(sum([op[1].gross_revenue for op in self.chart_data])),
         ]
 
         try:
@@ -264,7 +284,8 @@ class ValuationReportScreen(ReportScreen):
 
         if total_rev_arb < 0:
             report_templates.append('The gross revenue from [b]arbitrage[/b] was [b]{0}[/b], an overall deficit. ' \
-                                    'This implies participation in arbitrage was solely for the purpose of having capacity to offer regulation up services.'.format(rev_arb_format))
+                                    'This implies participation in arbitrage was solely for the purpose of having '
+                                    'capacity to offer regulation up services.'.format(rev_arb_format))
 
         self.desc.text += ' '.join(report_templates)
 
@@ -301,7 +322,10 @@ class ValuationReportScreen(ReportScreen):
 
         # generate report text
         self.title.text = "Here's how much the device participated in each revenue stream."
-        self.desc.text = 'Each sector represents the share of total state of charge management actions attributed to the specific activity. For example, if 33% of the actions were \"buy (arbitrage),\" that means 33% of the total actions performed were for buying energy through arbitrage. \n\n'
+        self.desc.text = 'Each sector represents the share of total state of charge management actions attributed to ' \
+                         'the specific activity. For example, if 33% of the actions were \"buy (arbitrage),' \
+                         '\" that means 33% of the total actions performed were for buying energy through arbitrage. ' \
+                         '\n\n '
         report_templates = [
             'The [b]total[/b] number of actions performed over the evaluation period was [b]{0:n}[/b].'.format(
                 n_total),
@@ -309,8 +333,10 @@ class ValuationReportScreen(ReportScreen):
 
         if n_activities['sell (arbitrage)']/float(n_total) < n_activities['buy (arbitrage)']/float(n_total):
             report_templates.append(
-                'The [b]percentage[/b] of actions of selling in the [b]arbitrage[/b] market was [b]{0:.2f}%[/b], less than the percentage for buying. ' \
-                'This implies that participation in arbitrage was for the purpose of having energy to offer regulation up services.'.format(
+                'The [b]percentage[/b] of actions of selling in the [b]arbitrage[/b] market was [b]{0:.2f}%[/b], '
+                'less than the percentage for buying. ' \ 
+                'This implies that participation in arbitrage was for the purpose of having energy to offer '
+                'regulation up services.'.format(
                     n_activities['sell (arbitrage)']/float(n_total)*100))
         #
         # if sum([n_activities[name] for name in regulation_def])/float(n_total) > 0.50:
@@ -439,7 +465,7 @@ class GenerateReportMenu(ModalView):
 
         # Draw figures for saving to .png.
         for ix, opt in enumerate(self.host_report.chart_types.items(), start=0):
-            screen = ValuationReportScreen(type=opt[1], chart_data=self.host_report.chart_data, market=self.host_report.market, name=opt[1], do_animation=False)
+            screen = ValuationReportScreen(chart_type=opt[1], chart_data=self.host_report.chart_data, market=self.host_report.market, name=opt[1], do_animation=False)
 
             Clock.schedule_once(partial(self.save_figure, screen), ix * screen_flip_interval)
 

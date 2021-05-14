@@ -1003,6 +1003,9 @@ class ValuationWizardExecute(Screen):
 
     def _next_screen(self, *args):
         """Adds the report screen if it does not exist and changes screens to it."""
-        report = ValuationReport(name='report', chart_data=self.solved_ops, market=self.report_attributes['market type'], report_attributes=self.report_attributes)
+        report = ValuationReport(name='report',
+                                 chart_data=self.solved_ops,
+                                 market=self.report_attributes['market type'],
+                                 report_attributes=self.report_attributes)
         self.manager.switch_to(report, direction='left', duration=BASE_TRANSITION_DUR)
 

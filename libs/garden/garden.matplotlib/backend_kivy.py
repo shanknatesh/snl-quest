@@ -298,9 +298,6 @@ from kivy.logger import Logger
 from kivy.clock import Clock
 from distutils.version import LooseVersion
 
-_mpl_ge_1_5 = LooseVersion(matplotlib.__version__) >= LooseVersion('1.5.0')
-_mpl_ge_2_0 = LooseVersion(matplotlib.__version__) >= LooseVersion('2.0.0')
-
 import numpy as np
 import io
 import textwrap
@@ -309,6 +306,8 @@ import numbers
 from functools import partial
 from math import cos, sin, pi
 
+_mpl_ge_1_5 = LooseVersion(matplotlib.__version__) >= LooseVersion('1.5.0')
+_mpl_ge_2_0 = LooseVersion(matplotlib.__version__) >= LooseVersion('2.0.0')
 kivy.require('1.9.1')
 
 toolbar = None
@@ -341,8 +340,8 @@ class MPLKivyApp(App):
 
 
 def draw_if_interactive():
-    '''Handle whether or not the backend is in interactive mode or not.
-    '''
+    """Handle whether or not the backend is in interactive mode or not.
+    """
     if matplotlib.is_interactive():
         figManager = Gcf.get_active()
         if figManager:
@@ -350,21 +349,22 @@ def draw_if_interactive():
 
 
 class Show(ShowBase):
-    '''mainloop needs to be overwritten to define the show() behavior for kivy
+    """mainloop needs to be overwritten to define the show() behavior for kivy
        framework.
-    '''
+    """
     def mainloop(self):
         app = App.get_running_app()
         if app is None:
             app = MPLKivyApp(figure=my_canvas, toolbar=toolbar)
             app.run()
 
+
 show = Show()
 
 
 def new_figure_manager(num, *args, **kwargs):
-    '''Create a new figure manager instance for the figure given.
-    '''
+    """Create a new figure manager instance for the figure given.
+    """
     # if a main-level app must be created, this (and
     # new_figure_manager_given_figure) is the usual place to
     # do it -- see backend_wx, backend_wxagg and backend_tkagg for

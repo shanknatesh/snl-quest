@@ -4,7 +4,7 @@ from distutils.core import Extension
 DISTNAME = 'QuESt'
 VERSION = '1.2.f'
 EXTENSIONS = []
-PYTHON_REQUIRES='>=36'
+PYTHON_REQUIRES = '>=36'
 DESCRIPTION = 'Sandia National Laboratories application suite for energy storage analysis and evaluation tools.'
 LONG_DESCRIPTION = open('README.md').read()
 AUTHOR = 'Sandia National Laboratories'
@@ -35,4 +35,5 @@ setup(name=DISTNAME,
       maintainer_email=MAINTAINER_EMAIL,
       license=LICENSE,
       url=URL,
+      install_requires=['kivy', 'pandas', 'numpy', 'pyomo'],
       **setuptools_kwargs)

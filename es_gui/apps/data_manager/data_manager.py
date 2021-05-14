@@ -1240,6 +1240,7 @@ class DataManager(EventDispatcher):
 
         return model_params_all
 
+
 class DataManagerException(Exception):
     pass
 

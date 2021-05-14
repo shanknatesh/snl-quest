@@ -19,6 +19,7 @@ class ValuationDMS(DataManagementSystem):
         DataManagementSystem.__init__(self, **kwargs)
 
         self.home_path = home_path
+        logging.info(f'home path is: {home_path}')
 
         # with open(os.path.abspath(os.path.join(self.home_path, '..', 'es_gui', 'apps', 'valuation', 'definitions', 'nodes.json')), 'r') as fp:
         #     self.NODES = json.load(fp)
